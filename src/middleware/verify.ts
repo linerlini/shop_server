@@ -19,9 +19,9 @@ const verifyMiddleware: Middleware = async (ctx, next) => {
       ctx.state.jwtPayload = payload
       await next()
     } else if (result === 'timeout') {
-      ctx.body = createRes(ResponseCode.TOKEN_OUT, null, 'token过期')
+      ctx.body = createRes(ResponseCode.TOKEN_OUT, null, 'token过期, 请重新登录')
     } else {
-      ctx.body = createRes(ResponseCode.TOKEN_WRONG, null, 'token无效')
+      ctx.body = createRes(ResponseCode.TOKEN_WRONG, null, 'token无效, 请重新登录')
     }
   }
 }

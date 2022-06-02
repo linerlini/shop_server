@@ -1,4 +1,5 @@
-import { UserModel } from '.'
+import { OrderStatus } from 'utils/contants'
+import { AddressModel, OrderDetailModel, OrderModel, TableRecordBase, UserModel } from '.'
 
 export interface ResponseData<T> {
   code: number
@@ -36,4 +37,13 @@ export interface RequestUpdateShoppingCarItemCount {
 export interface RequestAddShoppingCar {
   goodId: string
   count: number
+}
+export interface RequestEditAddress {
+  addressData: AddressModel
+  addressId?: string
+  actionType: 'edit' | 'add'
+}
+export interface RequestCreateOrder extends Omit<OrderModel, keyof TableRecordBase & 'fromUserId'> {
+  goods: Omit<OrderDetailModel, keyof TableRecordBase>[]
+  shoppingCarIds: string[]
 }

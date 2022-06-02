@@ -19,3 +19,20 @@ export const enum ResponseCode {
   DATABASE_ERROR = 994,
   FILE_UP_ERROR = 993,
 }
+export const enum CouponTimeStatus {
+  AVAILABLE = 'available',
+  OUT = 'out',
+  BEFORE = 'before',
+}
+export const enum OrderStatus {
+  CONFIRM = '0',
+  FOR_PAYMENT = '1',
+  WAITDELIVER = '2',
+  FOR_GOODS = '3',
+  TO_EVALUATE = '4',
+  REFUND_ING = '5',
+  REFUND_END = '6',
+}
+export const enum PayMethod {
+  INTEGRAL = '1',
+}

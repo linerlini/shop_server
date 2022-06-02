@@ -1,3 +1,5 @@
+import { OrderStatus, PayMethod } from 'utils/contants'
+
 export interface TableRecordBase {
   uuid: string
   createdAt: string
@@ -51,4 +53,45 @@ export interface CommentModel extends TableRecordBase {
   userName: string
   avatar: string
   rate: number
+}
+export interface AddressModel extends TableRecordBase {
+  name: string
+  tel: string
+  province: string
+  city: string
+  county: string
+  addressDetail: string
+  areaCode: string
+  postalCode: string
+  isDefault: boolean
+  fromUserId?: string
+}
+export interface CouponModel extends TableRecordBase {
+  name: string
+  condition: number
+  description?: string
+  startAt: string
+  endAt: string
+  value: number
+  valueDesc: string
+  unitDesc: string
+}
+export interface UserCouponModel extends Omit<CouponModel, 'createdAt' | 'updatedAt'> {
+  status: number
+}
+export interface OrderModel extends TableRecordBase {
+  total: number
+  status: OrderStatus
+  leaveMessage: string
+  payMethod: PayMethod
+  fromUserId: string
+  name: string
+  addressDetail: string
+  tel: string
+  couponId: string
+}
+export interface OrderDetailModel extends TableRecordBase {
+  price: number
+  count: number
+  goodId: string
 }

@@ -1,10 +1,12 @@
 import Router from '@koa/router'
 import User from 'model/user'
-import { JWTPayload, RequestLoginBody, RequestRegisterBody } from 'types/server'
-import { createRes } from 'utils/index'
+import { JWTPayload, RequestEditAddress, RequestLoginBody, RequestRegisterBody } from 'types/server'
+import { createRes, saveFile } from 'utils/index'
 import { ResponseCode } from 'utils/contants'
 import HTTPError from 'utils/http_error'
 import { sign } from 'utils/jst'
+import Address from 'model/address'
+import UserCoupon from 'model/user_coupon'
 
 const userRoute = new Router({ prefix: '/user' })
 // 用户注册
@@ -26,6 +28,7 @@ userRoute.post('/register', async (ctx) => {
         ...result,
         password: '',
       },
+      coupons: [],
       token,
     },
     '注册成功',
@@ -40,6 +43,7 @@ userRoute.post('/login', async (ctx) => {
     const truePassword = user.password
     if (truePassword === password) {
       const token = await sign({ account, name: user.name, uuid: user.uuid })
+      const coupons = await UserCoupon.getAll(user.uuid)
       ctx.body = createRes(
         ResponseCode.SUCCESS,
         {
@@ -47,6 +51,7 @@ userRoute.post('/login', async (ctx) => {
             ...user,
             password: '',
           },
+          coupons,
           token,
         },
         '登录成功',
@@ -70,10 +75,79 @@ userRoute.get('/auto', async (ctx) => {
   const userR = await User.getUserByAccount(account)
   const userInfo = userR?.get()
   if (userInfo) {
-    ctx.body = createRes(ResponseCode.SUCCESS, { ...userInfo, password: '' }, '')
+    const coupons = await UserCoupon.getAll(userInfo.uuid)
+    userInfo.password = ''
+    ctx.body = createRes(ResponseCode.SUCCESS, { userInfo, coupons }, '')
   } else {
     ctx.body = createRes(ResponseCode.LACK_OF_ERROR, null, '请重新登录')
   }
 })
 
+// 用户地址
+userRoute.get('/address/list', async (ctx) => {
+  const { uuid } = ctx.state.jwtPayload
+  const result = await Address.getAll(uuid)
+  ctx.body = createRes(ResponseCode.SUCCESS, result, '')
+})
+userRoute.post('/address/edit', async (ctx) => {
+  const { uuid } = ctx.state.jwtPayload
+  const { addressData, actionType, addressId } = ctx.request.body as RequestEditAddress
+  if (actionType === 'add') {
+    const result = await Address.addOne(uuid, addressData)
+    ctx.body = createRes(ResponseCode.SUCCESS, result.getDataValue('uuid'), '')
+  } else {
+    const result = await Address.editOne(uuid, addressId || '', addressData)
+    if (result) {
+      ctx.body = createRes(ResponseCode.SUCCESS, '', '')
+    } else {
+      ctx.body = createRes(ResponseCode.NO_MATCH_ERROR, '', '不存在该地址，无法修改')
+    }
+  }
+})
+userRoute.get('/address/delete', async (ctx) => {
+  const { id } = ctx.request.query
+  const { uuid } = ctx.state.jwtPayload
+  await Address.deleteOne(id as string, uuid)
+  ctx.body = createRes(ResponseCode.SUCCESS, '', '')
+})
+// 优惠卷
+userRoute.get('/coupon/add', async (ctx) => {
+  const { id } = ctx.request.query
+  const { uuid } = ctx.state.jwtPayload
+  const result = await UserCoupon.addOne(uuid, id as string)
+  if (result.status) {
+    ctx.body = createRes(ResponseCode.SUCCESS, result.data, '')
+  } else {
+    ctx.body = createRes(ResponseCode.NO_MATCH_ERROR, '', result.msg)
+  }
+})
+// 个人资料
+userRoute.post('/edit', async (ctx) => {
+  const { name, desc } = ctx.request.body
+  const { account } = ctx.state.jwtPayload
+  const { files } = ctx.request
+
+  if (!files || !files.avatar) {
+    ctx.body = createRes(ResponseCode.LACK_OF_ERROR, '', '未上传头像')
+    return
+  }
+  const { avatar } = files
+  const imgURL = await saveFile(avatar)
+  const result = await User.updateUser(account, {
+    name,
+    desc,
+    avatar: imgURL,
+  })
+  if (result) {
+    ctx.body = createRes(
+      ResponseCode.SUCCESS,
+      {
+        avatar: imgURL,
+      },
+      '',
+    )
+  } else {
+    ctx.body = createRes(ResponseCode.NO_MATCH_ERROR, '', '不存在该账号')
+  }
+})
 export default userRoute

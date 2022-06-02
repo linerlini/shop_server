@@ -39,6 +39,8 @@ class ShoppingCar extends Model {
           title: goodData.title,
           price: goodData.price,
           imgURL: goodData.goodImg,
+          type: goodData.type,
+          goodType: goodData.goodType,
         }
         delete formatItem.Good
         return formatItem

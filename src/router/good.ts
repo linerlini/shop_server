@@ -62,5 +62,9 @@ route.get('/collect', async (ctx) => {
   await UserCollection.collect(uuid, id as string, collected)
   ctx.body = createRes(ResponseCode.SUCCESS, collected, '')
 })
-
+route.post('/collect/list', async (ctx) => {
+  const { uuid } = ctx.state.jwtPayload
+  const result = await UserCollection.getByPage(ctx.request.body as RequestPage, uuid)
+  ctx.body = createRes(ResponseCode.SUCCESS, result, '')
+})
 export default route
