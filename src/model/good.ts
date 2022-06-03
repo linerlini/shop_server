@@ -5,6 +5,8 @@ import { RequestPage } from 'types/server'
 import HTTPError from 'utils/http_error'
 import { ResponseCode } from 'utils/contants'
 import { GoodModel } from '../types/index'
+import Comment from './comment'
+import User from './user'
 
 function parseParams(params: string): Record<string, string> {
   const parseData = JSON.parse(params)
@@ -19,6 +21,17 @@ export function formatGoodData(goodRecord: any) {
   parseData.params = parseParams(parseData.params)
   parseData.goodSwiperImgs = parseImgs(parseData.goodSwiperImgs)
   parseData.goodInfoImgs = parseImgs(parseData.goodInfoImgs)
+  if (parseData.Comments) {
+    parseData.comments = parseData.Comments.map((item: any) => {
+      const commentData = item.get()
+      const userData = commentData.User.get()
+      return {
+        ...userData,
+        ...commentData,
+      }
+    })
+    delete parseData.Comments
+  }
   return parseData as GoodModel
 }
 class Good extends Model {
@@ -60,6 +73,13 @@ class Good extends Model {
         where: {
           uuid: id,
         },
+        include: [
+          {
+            model: Comment,
+            order: [['createdAt', 'DESC']],
+            include: [{ model: User, attributes: ['name', 'avatar'] }],
+          },
+        ],
       })
       return result
     } catch (err) {
