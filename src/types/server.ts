@@ -1,4 +1,3 @@
-import { OrderStatus } from 'utils/contants'
 import { AddressModel, OrderDetailModel, OrderModel, TableRecordBase, UserModel } from '.'
 
 export interface ResponseData<T> {
@@ -46,4 +45,18 @@ export interface RequestEditAddress {
 export interface RequestCreateOrder extends Omit<OrderModel, keyof TableRecordBase & 'fromUserId'> {
   goods: Omit<OrderDetailModel, keyof TableRecordBase>[]
   shoppingCarIds: string[]
+}
+export interface RequestPay {
+  id: string
+  address?: AddressModel
+}
+export interface RequestComment {
+  orderId: string
+  comment: string
+  rate: number
+  goodIds: string[]
+}
+export interface RequestRefund {
+  orderId: string
+  refundMessage: string
 }

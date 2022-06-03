@@ -49,9 +49,7 @@ export interface GoodModel extends TableRecordBase {
 export interface CommentModel extends TableRecordBase {
   goodID: string
   content: string
-  userID: string
-  userName: string
-  avatar: string
+  fromUserId: string
   rate: number
 }
 export interface AddressModel extends TableRecordBase {

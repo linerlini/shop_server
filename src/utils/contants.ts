@@ -32,6 +32,7 @@ export const enum OrderStatus {
   TO_EVALUATE = '4',
   REFUND_ING = '5',
   REFUND_END = '6',
+  SUCCESS = '7',
 }
 export const enum PayMethod {
   INTEGRAL = '1',

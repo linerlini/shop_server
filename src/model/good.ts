@@ -67,6 +67,29 @@ class Good extends Model {
       throw new HTTPError(ResponseCode.DATABASE_ERROR, '服务器异常，请重试', 200)
     }
   }
+
+  static async changeSales(goodSaltes: Array<{ goodId: string; count: number }>, up: boolean) {
+    const goodIdSaleMap = goodSaltes.reduce((obj, item) => {
+      // eslint-disable-next-line no-param-reassign
+      obj[item.goodId] = item.count
+      return obj
+    }, {} as Record<string, number>)
+    const goodIds = goodSaltes.map((item) => item.goodId)
+    const goodRecords = await Good.findAll({
+      where: {
+        uuid: {
+          [Op.in]: goodIds,
+        },
+      },
+    })
+    if (up) {
+      const resultP = goodRecords.map((good) => good.increment({ sales: goodIdSaleMap[good.getDataValue('uuid')] }))
+      await Promise.all(resultP)
+    } else {
+      const resultP = goodRecords.map((good) => good.decrement({ sales: goodIdSaleMap[good.getDataValue('uuid')] }))
+      await Promise.all(resultP)
+    }
+  }
 }
 
 Good.init(

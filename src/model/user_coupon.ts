@@ -113,6 +113,19 @@ class UserCoupon extends Model {
       throw new HTTPError(ResponseCode.DATABASE_ERROR, '服务器异常，请重试', 500)
     }
   }
+
+  static async returnOne(userId: string, couponId: string) {
+    const result = await UserCoupon.findOne({
+      where: {
+        couponId,
+        userId,
+      },
+    })
+    if (result) {
+      result.set('status', 1)
+      await result.save()
+    }
+  }
 }
 UserCoupon.init(
   {

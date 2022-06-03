@@ -127,17 +127,17 @@ userRoute.post('/edit', async (ctx) => {
   const { account } = ctx.state.jwtPayload
   const { files } = ctx.request
 
-  if (!files || !files.avatar) {
-    ctx.body = createRes(ResponseCode.LACK_OF_ERROR, '', '未上传头像')
-    return
-  }
-  const { avatar } = files
-  const imgURL = await saveFile(avatar)
-  const result = await User.updateUser(account, {
+  const params: any = {
     name,
     desc,
-    avatar: imgURL,
-  })
+  }
+  let imgURL = ''
+  if (files && files.avatar) {
+    const { avatar } = files
+    imgURL = await saveFile(avatar)
+    params.avatar = imgURL
+  }
+  const result = await User.updateUser(account, params)
   if (result) {
     ctx.body = createRes(
       ResponseCode.SUCCESS,
